@@ -95,7 +95,7 @@ if __name__ == '__main__':
         print(__doc__)
     elif ARGC == 2:
         if ARGV[1].startswith("--"):
-            if ARGV[1][2:] == 'renew_all':
+            if ARGV[1][2:] == 'renew-all':
                 renew_all()
             else:
                 print(__doc__)
