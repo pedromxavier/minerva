@@ -1,5 +1,12 @@
 #!/usr/bin/python3
+"""
+minerva [OPTIONS] usr psw
 
+OPTIONS:
+    --renew-all -r : renew all cached usr, psw pairs (no extra args)
+
+    --cache     -c : renews and caches actual usr, psw
+"""
 import urllib.request as url
 from urllib.parse import urlencode, quote_plus
 
@@ -64,14 +71,58 @@ def main(usr, psw):
     return 0;
     "__END__"
 
+def renew_all():
+    with open('minerva.cache') as file:
+        for line in file:
+            line = line.strip()
+            usr, psw = line.split("&")
+            main(usr, psw)
+            print("Renewed {}".format(usr))
+
+def cache(usr, psw):
+    with open('minerva.cache', 'a+') as file:
+        buffer = "{}&{}\n".format(usr, psw)
+        
+        file.seek(0)
+        text = file.read()
+
+        if buffer not in text:
+            file.write(buffer)
+            print("Cached {}".format(usr))
+    
 if __name__ == '__main__':
     if ARGC == 1:
-        print("usr psw missing.")
+        print(__doc__)
     elif ARGC == 2:
-        print("psw missing.")
+        if ARGV[1].startswith("--"):
+            if ARGV[1][2:] == 'renew_all':
+                renew_all()
+            else:
+                print(__doc__)
+        elif ARGV[1].startswith("-"):
+            if ARGV[1][1:] == 'r':
+                renew_all()
+            else:
+                print(__doc__)
+        else:
+            print(__doc__)
     elif ARGC == 3:
         usr, psw = ARGV[1:]
         status = main(usr, psw)
+        sys.exit(status)
+    elif ARGC == 4:
+        usr, psw = ARGV[2:4]
+        status = main(usr, psw)
+        if ARGV[1].startswith("--"):
+            if ARGV[1][2:] == 'cache' and not status:
+                cache(usr, psw)
+            else:
+                print(__doc__)
+        elif ARGV[1].startswith("-"):
+            if ARGV[1][1:] == 'c':
+                cache(usr, psw)
+            else:
+                print(__doc__)
         sys.exit(status)
     else:
         print("Too much args, expected 2 (usr psw)")
