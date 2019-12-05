@@ -35,7 +35,7 @@ def HyperLink(link, key, sep):
 
     return new_link;
         
-def main(usr, psw):
+def renew(usr, psw):
     "___SCRIPT___"
     URL         = "http://minerva.ufrj.br";
     SESSION_KEY = int(random()*(10**9));
@@ -70,6 +70,13 @@ def main(usr, psw):
         j+=1;
     return 0;
     "__END__"
+
+def main(usr, pswd):
+    try:
+        renew(usr, pswd)
+    except:
+        print("Renew failure for {}".format(usr))
+
 
 def renew_all():
     with open('minerva.cache') as file:
