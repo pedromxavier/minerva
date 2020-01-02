@@ -6,7 +6,25 @@ from urllib.parse import urlencode, quote_plus
 
 from random import random
 
+import sys
+import os
 import pickle
+
+def wrap_dir(callback):
+    def new_callback(*args, **kwargs):
+        cwd = os.getcwd()
+        os.chdir(os.path.dirname(sys.argv[0]))
+
+        try:
+            ans = callback(*args, **kwargs)
+        except Exception:
+            os.chdir(cwd)
+            raise
+        finally:
+            os.chdir(cwd)
+            return ans
+
+    return new_callback
 
 def follow_link(link, key, sep):
     answer = url.urlopen(link)
@@ -25,7 +43,7 @@ def follow_link(link, key, sep):
 
     return new_link
         
-def renew(user, pswd):
+def _renew(user, pswd):
     URL         = "http://minerva.ufrj.br"
     SESSION_KEY = int(random() * 1_000_000_000)
 
@@ -54,13 +72,14 @@ def renew(user, pswd):
     for KEY,SEP in KEYS[2:]:
         LINKS.append(follow_link(LINKS[-1], KEY, SEP))
 
-def main(user, pswd):
+def renew(user, pswd):
     try:
-        renew(user, pswd)
+        _renew(user, pswd)
         print("[{}] renovado com sucesso.".format(user))
+        return True
     except:
         print("Falha ao renovar [{}]".format(user))
-
+        return False
 
 def get_cache():
     try:
@@ -69,7 +88,8 @@ def get_cache():
     
     except FileNotFoundError:
         return set()
-
+        
+@wrap_dir
 def renew_all():
     data = get_cache()
 
@@ -80,7 +100,8 @@ def renew_all():
         for user, pswd in data:
             main(user, pswd)
 
-def cache(user, pswd):
+@wrap_dir
+def add_cache(user, pswd):
     data = get_cache()
 
     data.add((user, pswd))
@@ -88,11 +109,16 @@ def cache(user, pswd):
     with open('minerva.cache', 'wb') as file:
         pickle.dump(data, file)
 
+def main(user, pswd, cache=False):
+    if renew(user, pswd) and cache:
+        add_cache(user, pswd)
+    
+
 if __name__ == '__main__':
     import argparse as ap
 
-    class RenewAll(argparse.Action):
-        def __init__(self, option_strings, dest=argparse.SUPPRESS, default=argparse.SUPPRESS, help=None):
+    class RenewAll(ap.Action):
+        def __init__(self, option_strings, dest=ap.SUPPRESS, default=ap.SUPPRESS, help=None):
             super(RenewAll, self).__init__(option_strings=option_strings, dest=dest, default=default, nargs=0, help=help)
 
         def __call__(self, parser, namespace, values, option_string=None):
@@ -117,5 +143,5 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--renew-all', action=RenewAll, help=renew_all_help)
     
     args = parser.parse_args()
-		
-    
+
+    main(args.user, args.pswd, cache=args.cache)
