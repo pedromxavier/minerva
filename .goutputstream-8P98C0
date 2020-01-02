@@ -1,37 +1,44 @@
 #!/usr/bin/python3
 """ Renova livros da biblioteca da UFRJ através do portal 'https://minerva.ufrj.br'.
 """
+import argparse as ap
+
 import urllib.request as url
 from urllib.parse import urlencode, quote_plus
 
+import sys
+
 from random import random
 
-import pickle
+ARGC = len(sys.argv)
+ARGV = sys.argv
 
 def follow_link(link, key, sep):
-    answer = url.urlopen(link)
-    source = str(answer.read())
-    data   = source.split(r'\n')
+    "___READ___"
+    answer = url.urlopen(link);
+    source = str(answer.read());
+    data   = source.split(r'\n');
 
+    "____SEEK____"
     new_link = str();
     for line in data:
         if key in line:
-            new_link = line.split(sep)[1]
-            break
+            new_link = line.split(sep)[1];
+            break;
         else:
-            continue
+            continue;
+    assert new_link;
 
-    assert new_link
-
-    return new_link
+    return new_link;
         
-def renew(user, pswd):
-    URL         = "http://minerva.ufrj.br"
-    SESSION_KEY = int(random() * 1_000_000_000)
+def renew(usr, psw):
+    "___SCRIPT___"
+    URL         = "http://minerva.ufrj.br";
+    SESSION_KEY = int(random()*(10**9));
 
     FORM        = urlencode({'func'            :'login-session',
-                             'bor_id'          : user,
-                             'bor_verification': pswd,
+                             'bor_id'          : usr,
+                             'bor_verification': psw,
                              'bor_library'     :'UFR50',
                              'x'               :'0',
                              'y'               :'0'}, quote_via = quote_plus);
@@ -44,52 +51,46 @@ def renew(user, pswd):
                     ('func=file&file_name=logout',"'"),
                     ('func=logout','"')];
 
-    LINKS       = ["{}/F?RN={}".format(URL, SESSION_KEY)]
+    LINKS       = ["{}/F?RN={}".format(URL, SESSION_KEY)];
     
     for KEY, SEP in KEYS[:2]:
-        LINKS.append(follow_link(LINKS[-1], KEY, SEP))
+        LINKS.append(HyperLink(LINKS[-1], KEY, SEP));
 
-    LINKS.append("{}?{}".format(LINKS[-1], FORM))
+    LINKS.append("{}?{}".format(LINKS[-1], FORM));
 
     for KEY,SEP in KEYS[2:]:
-        LINKS.append(follow_link(LINKS[-1], KEY, SEP))
+        LINKS.append(HyperLink(LINKS[-1], KEY, SEP));
 
-def main(user, pswd):
+    return 0;
+
+def main(usr, pswd):
     try:
-        renew(user, pswd)
-        print("[{}] renovado com sucesso.".format(user))
+        renew(usr, pswd)
     except:
-        print("Falha ao renovar [{}]".format(user))
+        print("Renew failure for {}".format(usr))
 
-
-def get_cache():
-    try:
-        with open('minerva.cache', 'rb') as file:
-            return pickle.load(file)
-    
-    except FileNotFoundError:
-        return set()
 
 def renew_all():
-    data = get_cache()
+    with open('minerva.cache') as file:
+        for line in file:
+            line = line.strip()
+            usr, psw = line.split("&")
+            try:
+                main(usr, psw)
+                print("Renewed {}".format(usr))
 
-    if not data:
-        print("Não há credenciais salvas para renovar.")
-        return
-    else:
-        for user, pswd in data:
-            main(user, pswd)
+def cache(usr, psw):
+    with open('minerva.cache', 'a+') as file:
+        buffer = "{}&{}\n".format(usr, psw)
+        
+        file.seek(0)
+        text = file.read()
 
-def cache(user, pswd):
-    data = get_cache()
-
-    data.add((user, pswd))
-
-    with open('minerva.cache', 'wb') as file:
-        pickle.dump(data, file)
-
+        if buffer not in text:
+            file.write(buffer)
+            print("Cached {}".format(usr))
+    
 if __name__ == '__main__':
-    import argparse as ap
 
     class RenewAll(argparse.Action):
         def __init__(self, option_strings, dest=argparse.SUPPRESS, default=argparse.SUPPRESS, help=None):
@@ -117,5 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--renew-all', action=RenewAll, help=renew_all_help)
     
     args = parser.parse_args()
+
+    sys.exit(1)
 		
     
