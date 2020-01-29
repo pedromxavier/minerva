@@ -21,11 +21,11 @@ def wrap_dir(callback):
         try:
             ans = callback(*args, **kwargs)
         except Exception:
-            if nwd: os.chdir(cwd)
             raise
         finally:
             if nwd: os.chdir(cwd)
-            return ans
+        
+        return ans
 
     return new_callback
 
