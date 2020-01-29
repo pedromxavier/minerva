@@ -13,15 +13,18 @@ import pickle
 def wrap_dir(callback):
     def new_callback(*args, **kwargs):
         cwd = os.getcwd()
-        os.chdir(os.path.dirname(sys.argv[0]))
+
+        nwd = os.path.dirname(sys.argv[0])
+
+        if nwd: os.chdir(nwd)
 
         try:
             ans = callback(*args, **kwargs)
         except Exception:
-            os.chdir(cwd)
+            if nwd: os.chdir(cwd)
             raise
         finally:
-            os.chdir(cwd)
+            if nwd: os.chdir(cwd)
             return ans
 
     return new_callback
