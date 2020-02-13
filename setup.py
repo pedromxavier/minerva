@@ -119,7 +119,7 @@ kwargs = {
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    "package_dir" : {'': 'minerva'},  # Optional
+    ## "package_dir" : {'': 'src'},  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -130,7 +130,7 @@ kwargs = {
     #
     #   py_modules=["my_module"],
     #
-    "packages" : find_packages(where='minerva'),  # Required
+    "packages" : find_packages(where='src'),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
