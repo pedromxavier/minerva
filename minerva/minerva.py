@@ -112,12 +112,11 @@ def add_cache(user, pswd):
     with open('minerva.cache', 'wb') as file:
         pickle.dump(data, file)
 
-def main(user, pswd, cache=False):
+def renew_and_cache(user, pswd, cache=False):
     if renew(user, pswd) and cache:
         add_cache(user, pswd)
     
-
-if __name__ == '__main__':
+def main():
     import argparse as ap
 
     class RenewAll(ap.Action):
@@ -147,4 +146,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    main(args.user, args.pswd, cache=args.cache)
+    renew_and_cache(args.user, args.pswd, cache=args.cache)
+
+if __name__ == '__main__':
+    main()

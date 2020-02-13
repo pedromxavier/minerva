@@ -43,7 +43,7 @@ kwargs = {
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    "version" : '1.0.0',  # Required
+    "version" : '1.0.1',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -76,15 +76,15 @@ kwargs = {
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    "url" : 'https://gremio-eci.github.io/wiki',  # Optional
+    "url" : 'https://pedromxavier.github.io/projects/minerva',  # Optional
 
     # This should be your name or the name of the organization which owns the
     # project.
-    "author" : 'Pedro Maciel Xavier',  # Optional
+    ## "author" : 'Pedro Maciel Xavier',  # Optional
 
     # This should be a valid email address corresponding to the author listed
     # above.
-    "author_email" : 'pedromxavier@poli.ufrj.br',  # Optional
+    ## "author_email" : 'pedromxavier@poli.ufrj.br',  # Optional
 
     # Classifiers help users find your project by categorizing it.
     #
@@ -94,7 +94,7 @@ kwargs = {
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: UFRJ Students',
@@ -119,7 +119,7 @@ kwargs = {
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    "package_dir" : {'': 'src'},  # Optional
+    "package_dir" : {'': 'minerva'},  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -130,7 +130,7 @@ kwargs = {
     #
     #   py_modules=["my_module"],
     #
-    "packages" : find_packages(where='src'),  # Required
+    "packages" : find_packages(where='minerva'),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -180,7 +180,9 @@ kwargs = {
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
     # platform.
-    #
+    
+    "scripts" : ['bin/minerva'],
+
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     ## "entry_points" : {  # Optional
@@ -199,10 +201,10 @@ kwargs = {
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     "project_urls" : {  # Optional
-        'Bug Reports': 'https://gremio-eci.github.io/wiki',
-        'Funding': 'https://gremio-eci.github.io/wiki',
-        'Say Thanks!': 'https://gremio-eci.github.io/wiki',
-        'Source': 'https://gremio-eci.github.io/wiki',
+        'Bug Reports': 'https://pedromxavier.github.io/projects/minerva',
+        'Funding': 'https://pedromxavier.github.io/projects/minerva',
+        'Say Thanks!': 'https://pedromxavier.github.io/projects/minerva',
+        'Source': 'https://pedromxavier.github.io/projects/minerva',
     },
 }
 
