@@ -1,1 +1,1 @@
-from .minerva import *
+from .minerva import main
