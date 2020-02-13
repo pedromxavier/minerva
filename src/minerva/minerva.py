@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 """ Renova livros da biblioteca da UFRJ através do portal 'https://minerva.ufrj.br'.
 """
 import urllib.request as url
