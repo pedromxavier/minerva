@@ -33,7 +33,7 @@ def follow_link(link, key, sep):
     source = str(answer.read())
     data   = source.split(r'\n')
 
-    new_link = str();
+    new_link = str()
     for line in data:
         if key in line:
             new_link = line.split(sep)[1]
@@ -54,7 +54,7 @@ def _renew(user, pswd):
                              'bor_verification': pswd,
                              'bor_library'     :'UFR50',
                              'x'               :'0',
-                             'y'               :'0'}, quote_via = quote_plus);
+                             'y'               :'0'}, quote_via = quote_plus)
 
     KEYS        =  [('LOGIN-PAGE', '"'),
                     ('action="', '"'),
@@ -62,7 +62,7 @@ def _renew(user, pswd):
                     ('func=bor-loan',"'"),
                     ('func=bor-renew-all&adm_library',"'"),
                     ('func=file&file_name=logout',"'"),
-                    ('func=logout','"')];
+                    ('func=logout','"')]
 
     LINKS       = ["{}/F?RN={}".format(URL, SESSION_KEY)]
     
@@ -100,7 +100,7 @@ def renew_all():
         return
     else:
         for user, pswd in data:
-            main(user, pswd)
+            renew(user, pswd)
 
 @wrap_dir
 def add_cache(user, pswd):
