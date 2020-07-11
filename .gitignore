@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Minerva Cache
-minerva.cache
-
 # Distribution / packaging
 .Python
 build/
