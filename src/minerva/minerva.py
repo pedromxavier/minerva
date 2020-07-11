@@ -2,17 +2,31 @@
 """
 import urllib.request as url
 from urllib.parse import urlencode, quote_plus
-
 from random import random
 
 import sys
 import os
 import pickle
 
+def get_home():
+    if os.name == 'posix': ## Linux, Mac
+        SUDO_USER = os.getenv("SUDO_USER")
+        if SUDO_USER is None:
+            return os.path.expanduser('~')
+        else:
+            return os.path.expanduser(f"~{SUDO_USER}/")
+    elif os.name == 'nt': ## Windows
+        return os.path.expanduser('~')
+    else:
+        raise SystemError(f'Installation Failed for your OS: `{os.name}`')
+
+HOME = get_home()
+MINERVA_DIR = os.path.join(HOME, '.minerva')
+MINERVA_FNAME = os.path.join(HOME, '.minerva', 'minerva.info')
+
 def wrap_dir(callback):
     def new_callback(*args, **kwargs):
         cwd = os.getcwd()
-
         nwd = os.path.dirname(sys.argv[0])
 
         if nwd: os.chdir(nwd)
@@ -31,7 +45,7 @@ def wrap_dir(callback):
 def follow_link(link, key, sep):
     answer = url.urlopen(link)
     source = str(answer.read())
-    data   = source.split(r'\n')
+    data = source.split(r'\n')
 
     new_link = str()
     for line in data:
@@ -46,25 +60,30 @@ def follow_link(link, key, sep):
     return new_link
         
 def _renew(user, pswd):
-    URL         = "http://minerva.ufrj.br"
+    URL = "http://minerva.ufrj.br"
+
     SESSION_KEY = int(random() * 1_000_000_000)
 
-    FORM        = urlencode({'func'            :'login-session',
-                             'bor_id'          : user,
-                             'bor_verification': pswd,
-                             'bor_library'     :'UFR50',
-                             'x'               :'0',
-                             'y'               :'0'}, quote_via = quote_plus)
+    FORM = urlencode({
+        'func'            :'login-session',
+        'bor_id'          : user,
+        'bor_verification': pswd,
+        'bor_library'     :'UFR50',
+        'x'               :'0',
+        'y'               :'0'
+        }, quote_via=quote_plus)
 
-    KEYS        =  [('LOGIN-PAGE', '"'),
-                    ('action="', '"'),
-                    ('func=bor-info','"'),
-                    ('func=bor-loan',"'"),
-                    ('func=bor-renew-all&adm_library',"'"),
-                    ('func=file&file_name=logout',"'"),
-                    ('func=logout','"')]
+    KEYS = [
+        ('LOGIN-PAGE', '"'),
+        ('action="', '"'),
+        ('func=bor-info','"'),
+        ('func=bor-loan',"'"),
+        ('func=bor-renew-all&adm_library',"'"),
+        ('func=file&file_name=logout',"'"),
+        ('func=logout','"')
+        ]
 
-    LINKS       = ["{}/F?RN={}".format(URL, SESSION_KEY)]
+    LINKS = ["{}/F?RN={}".format(URL, SESSION_KEY)]
     
     for KEY, SEP in KEYS[:2]:
         LINKS.append(follow_link(LINKS[-1], KEY, SEP))
@@ -85,9 +104,15 @@ def renew(user, pswd):
 
 def get_cache():
     try:
-        with open('minerva.cache', 'rb') as file:
-            return pickle.load(file)
-    
+        with open(MINERVA_FNAME, 'rb') as file:
+            try:
+                data = pickle.load(file)
+                if type(data) is not set:
+                    raise EOFError
+                else:
+                    return data
+            except EOFError:
+                return set()
     except FileNotFoundError:
         return set()
         
@@ -105,11 +130,14 @@ def renew_all():
 @wrap_dir
 def add_cache(user, pswd):
     data = get_cache()
-
     data.add((user, pswd))
-
-    with open('minerva.cache', 'wb') as file:
-        pickle.dump(data, file)
+    try:
+        with open(MINERVA_FNAME, 'wb') as file:
+            pickle.dump(data, file)
+    except FileNotFoundError:
+        os.mkdir(MINERVA_DIR)
+        with open(MINERVA_FNAME, 'wb') as file:
+            pickle.dump(data, file)
 
 def renew_and_cache(user, pswd, cache=False):
     if renew(user, pswd) and cache:

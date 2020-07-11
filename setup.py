@@ -8,25 +8,14 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 import os
-# io.open is needed for projects that support Python 2.7
-# It ensures open() defaults to text mode with universal newlines,
-# and accepts an argument to specify the text encoding
-# Python 3 only projects can skip this import
-from io import open
-
-pwd = os.path.abspath(os.path.dirname(__file__))
-
-def PWD(path):
-    return os.path.join(pwd, path)
+import shutil
+import pickle
 
 # Get the long description from the README file
-with open(PWD('README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+with open('README.md', encoding='utf-8') as file:
+    long_description = file.read()
 
-# Arguments marked as "Required" below must be included for upload to PyPI.
-# Fields marked as "Optional" may be commented out.
-
-kwargs = {
+SETUP_OPTIONS = {
     # This is the name of your project. The first time you publish this
     # package, this name will be registered for you. It will determine how
     # users can install this project, e.g.:
@@ -122,7 +111,7 @@ kwargs = {
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    "package_dir" : {'': PWD('src')},  # Optional
+    "package_dir" : {'': 'src'},  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -168,23 +157,23 @@ kwargs = {
     #
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.
-    "package_data" : {  # Optional
-        ## 'sample': ['package_data.dat'],
-    },
+    # "package_data" : {  # Optional
+    #     'minerva': ['src/minerva/minerva.info'],
+    # },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files
     #
-    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    ## "data_files" : [('my_data', ['data/data_file'])],  # Optional
+    # In this case, 'data_file' will be installed into '<sys.prefix>/.minerva'
+    # "data_files" : [('.minerva', ['src/minerva/minerva.info'])],  # Optional
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
     # platform.
     
-    "scripts" : [PWD('bin/minerva')],
+    "scripts" : ['bin/minerva'],
 
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
@@ -203,12 +192,48 @@ kwargs = {
     # issues, where the source is hosted, where to say thanks to the package
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
-    "project_urls" : {  # Optional
-        'Bug Reports': 'https://pedromxavier.github.io/projects/minerva',
-        'Funding': 'https://pedromxavier.github.io/projects/minerva',
-        'Say Thanks!': 'https://pedromxavier.github.io/projects/minerva',
-        'Source': 'https://pedromxavier.github.io/projects/minerva',
-    },
+    # "project_urls" : {  # Optional
+    #     'Bug Reports': 'https://pedromxavier.github.io/projects/minerva',
+    #     'Funding': 'https://pedromxavier.github.io/projects/minerva',
+    #     'Say Thanks!': 'https://pedromxavier.github.io/projects/minerva',
+    #     'Source': 'https://pedromxavier.github.io/projects/minerva',
+    # },
 }
 
-setup(**kwargs)
+def get_home():
+    if os.name == 'posix': ## Linux, Mac
+        SUDO_USER = os.getenv("SUDO_USER")
+        if SUDO_USER is None:
+            return os.path.expanduser('~')
+        else:
+            return os.path.expanduser(f"~{SUDO_USER}/")
+    elif os.name == 'nt': ## Windows
+        return os.path.expanduser('~')
+    else:
+        raise SystemError(f'Installation Failed for your OS: `{os.name}`')
+
+def main(**setup_options):
+    try:
+        setup(**setup_options)
+
+        HOME = get_home()
+        MINERVA_DIR = os.path.join(HOME, '.minerva')
+        MINERVA_FNAME = os.path.join(HOME, '.minerva', 'minerva.info')
+
+        if os.path.exists(MINERVA_DIR):
+            ## clean previous instalation
+            shutil.rmtree(MINERVA_DIR)
+
+        os.mkdir(MINERVA_DIR)
+        print(f'Created directory <{MINERVA_DIR}>')
+
+        with open(MINERVA_FNAME, 'wb') as file:
+            pickle.dump(set(), file)
+
+        ## Allow for read + write
+        os.chmod(MINERVA_FNAME, 0o666)
+    except:
+        raise
+
+if __name__ == '__main__':
+    main(**SETUP_OPTIONS)
