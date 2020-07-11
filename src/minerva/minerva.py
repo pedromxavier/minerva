@@ -24,24 +24,6 @@ HOME = get_home()
 MINERVA_DIR = os.path.join(HOME, '.minerva')
 MINERVA_FNAME = os.path.join(HOME, '.minerva', 'minerva.info')
 
-def wrap_dir(callback):
-    def new_callback(*args, **kwargs):
-        cwd = os.getcwd()
-        nwd = os.path.dirname(sys.argv[0])
-
-        if nwd: os.chdir(nwd)
-
-        try:
-            ans = callback(*args, **kwargs)
-        except Exception:
-            raise
-        finally:
-            if nwd: os.chdir(cwd)
-        
-        return ans
-
-    return new_callback
-
 def follow_link(link, key, sep):
     answer = url.urlopen(link)
     source = str(answer.read())
@@ -116,7 +98,6 @@ def get_cache():
     except FileNotFoundError:
         return set()
         
-@wrap_dir
 def renew_all():
     data = get_cache()
 
@@ -127,7 +108,6 @@ def renew_all():
         for user, pswd in data:
             renew(user, pswd)
 
-@wrap_dir
 def add_cache(user, pswd):
     data = get_cache()
     data.add((user, pswd))
